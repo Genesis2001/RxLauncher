@@ -54,29 +54,33 @@ namespace RxLauncher.ViewModels
 
 		public async void UpdateServerList()
 		{
-			string rxList;
+			string serverList;
 			using (WebClient client = new WebClient())
 			{
-				rxList = await client.DownloadStringTaskAsync(RxServerList);
+				serverList = await client.DownloadStringTaskAsync(RxServerList);
 			}
 
-			IList<Server> list = JsonConvert.DeserializeObject<IList<Server>>(rxList);
+			IList<Server> list = JsonConvert.DeserializeObject<IList<Server>>(serverList);
 			if (list != null)
 			{
 				foreach (Server item in list)
 				{
-					ServerViewModel s = Servers.SingleOrDefault(x => x.Address == item.Address && x.Port == item.Port);
+					ServerViewModel s = Servers.SingleOrDefault(x => x.IP == item.IP && x.Port == item.Port);
 					if (s != null)
 					{
 						int index = Servers.IndexOf(s);
 
+						s = (ServerViewModel)item;
 						Servers.RemoveAt(index);
-						Servers.Insert(index, (ServerViewModel)item);
+						Servers.Insert(index, s);
 					}
 					else
 					{
-						Servers.Add((ServerViewModel)item);
+						s = (ServerViewModel)item;
+						Servers.Add(s);
 					}
+
+					s.RefreshPing();
 				}
 			}
 		}

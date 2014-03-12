@@ -24,7 +24,7 @@ namespace RxLauncher.Models
 		public string GameVersion { get; set; }
 
 		[JsonProperty("IP")]
-		public string Address { get; set; }
+		public string IP { get; set; }
 
 		public int Port { get; set; }
 

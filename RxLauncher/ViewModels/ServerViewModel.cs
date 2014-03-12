@@ -6,16 +6,16 @@
 
 namespace RxLauncher.ViewModels
 {
-	using System;
 	using System.ComponentModel;
+	using System.Net;
+	using System.Net.NetworkInformation;
 	using System.Runtime.CompilerServices;
-	using System.Threading.Tasks;
 	using Models;
 
 	public class ServerViewModel : Server, IObservableClass
 	{
-		private long ping;
 		private bool isSelected;
+		private long ping;
 
 		public bool IsSelected
 		{
@@ -28,9 +28,32 @@ namespace RxLauncher.ViewModels
 			}
 		}
 
-		public Task<long> Ping()
+		public long Ping
 		{
-			throw new NotImplementedException();
+			get { return ping; }
+			private set
+			{
+				NotifyPropertyChanging();
+				ping = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		public async void RefreshPing()
+		{
+			IPAddress address;
+			if (!IPAddress.TryParse(IP, out address))
+			{
+				var entry = Dns.GetHostEntry(IP);
+				address   = entry.AddressList[0];
+			}
+
+			using (var p = new Ping())
+			{
+				PingReply reply = await p.SendPingAsync(address, 120);
+
+				Ping = reply.RoundtripTime;
+			}
 		}
 
 		#region Implementation of INotifyPropertyChanged

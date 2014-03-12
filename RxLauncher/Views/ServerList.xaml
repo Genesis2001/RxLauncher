@@ -8,7 +8,7 @@
 			 d:DataContext="{d:DesignInstance viewModels:ServerListViewModel, d:IsDesignTimeCreatable=False}"
              d:DesignHeight="300" d:DesignWidth="300">
 	
-	<DataGrid>
+	<ListView>
 		
-	</DataGrid>
+	</ListView>
 </UserControl>
