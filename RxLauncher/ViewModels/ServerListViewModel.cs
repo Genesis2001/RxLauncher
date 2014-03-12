@@ -21,9 +21,9 @@ namespace RxLauncher.ViewModels
 	{
 		public const string RxServerList = "http://renegadexgs.appspot.com/servers.jsp";
 
-		private ObservableCollection<Server> servers;
 		private CancellationToken token;
 		private readonly CancellationTokenSource tokenSource;
+		private ServerViewModel selected;
 
 		public ServerListViewModel()
 		{
@@ -35,7 +35,7 @@ namespace RxLauncher.ViewModels
 
 		public ServerListViewModel(IEnumerable<Server> servers) : this()
 		{
-			this.servers = new ObservableCollection<Server>(servers);
+			this.Servers = new ObservableCollection<ServerViewModel>(servers.Cast<ServerViewModel>());
 		}
 
 		~ServerListViewModel()
@@ -45,15 +45,11 @@ namespace RxLauncher.ViewModels
 
 		public ICommand RefreshCommand { get; private set; }
 
-		public ObservableCollection<Server> Servers
+		public ObservableCollection<ServerViewModel> Servers { get; private set; }
+
+		public ServerViewModel Selected
 		{
-			get { return servers; }
-			private set
-			{
-				NotifyPropertyChanging();
-				servers = value;
-				NotifyPropertyChanged();
-			}
+			get { return Servers.SingleOrDefault(x => x.IsSelected); }
 		}
 
 		public async void UpdateServerList()
@@ -69,17 +65,17 @@ namespace RxLauncher.ViewModels
 			{
 				foreach (Server item in list)
 				{
-					Server s = Servers.SingleOrDefault(x => x.Address == item.Address && x.Port == item.Port);
+					ServerViewModel s = Servers.SingleOrDefault(x => x.Address == item.Address && x.Port == item.Port);
 					if (s != null)
 					{
 						int index = Servers.IndexOf(s);
 
 						Servers.RemoveAt(index);
-						Servers.Insert(index, item);
+						Servers.Insert(index, (ServerViewModel)item);
 					}
 					else
 					{
-						Servers.Add(item);
+						Servers.Add((ServerViewModel)item);
 					}
 				}
 			}

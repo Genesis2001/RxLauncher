@@ -1,16 +1,38 @@
-﻿// -----------------------------------------------------------------------------
-//  <copyright file="ViewModel.cs" company="Zack Loveless">
+// -----------------------------------------------------------------------------
+//  <copyright file="ServerViewModel.cs" company="Zack Loveless">
 //      Copyright (c) Zack Loveless.  All rights reserved.
 //  </copyright>
 // -----------------------------------------------------------------------------
 
 namespace RxLauncher.ViewModels
 {
+	using System;
 	using System.ComponentModel;
 	using System.Runtime.CompilerServices;
+	using System.Threading.Tasks;
+	using Models;
 
-	public abstract class ViewModel : IObservableClass
+	public class ServerViewModel : Server, IObservableClass
 	{
+		private long ping;
+		private bool isSelected;
+
+		public bool IsSelected
+		{
+			get { return isSelected; }
+			set
+			{
+				NotifyPropertyChanging();
+				isSelected = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		public Task<long> Ping()
+		{
+			throw new NotImplementedException();
+		}
+
 		#region Implementation of INotifyPropertyChanged
 
 		public event PropertyChangedEventHandler PropertyChanged;

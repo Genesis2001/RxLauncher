@@ -6,10 +6,12 @@
 
 namespace RxLauncher.Models
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 
+	[Serializable]
 	public class Server
 	{
 		public string Name { get; set; }
