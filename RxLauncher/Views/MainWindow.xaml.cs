@@ -4,7 +4,7 @@
 //  </copyright>
 // -----------------------------------------------------------------------------
 
-namespace RxLauncher
+namespace RxLauncher.Views
 {
 	public partial class MainWindow
 	{

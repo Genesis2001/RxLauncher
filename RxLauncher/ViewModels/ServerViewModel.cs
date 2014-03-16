@@ -6,26 +6,63 @@
 
 namespace RxLauncher.ViewModels
 {
+	using System;
 	using System.ComponentModel;
 	using System.Net;
 	using System.Net.NetworkInformation;
 	using System.Runtime.CompilerServices;
 	using Models;
 
-	public class ServerViewModel : Server, IObservableClass
+	public class ServerViewModel : IObservableClass
 	{
-		private bool isSelected;
+		private readonly Server server;
 		private long ping;
 
-		public bool IsSelected
+		private ServerViewModel(Server server)
 		{
-			get { return isSelected; }
-			set
-			{
-				NotifyPropertyChanging();
-				isSelected = value;
-				NotifyPropertyChanged();
-			}
+			this.server = server;
+		}
+
+		#region Properties
+
+		public string Name
+		{
+			get { return server.Name; }
+		}
+
+		public int Bots
+		{
+			get { return server.Bots; }
+		}
+
+		public int Players
+		{
+			get { return server.Players; }
+		}
+		
+		public int MaxPlayers
+		{
+			get { return server.MaxPlayers; }
+		}
+
+		public string Version
+		{
+			get { return server.Version; }
+		}
+
+		public string IP
+		{
+			get { return server.ServerAddress; }
+		}
+
+		public int Port
+		{
+			get { return server.Port; }
+		}
+
+		public bool IsPassworded
+		{
+			get { return server.IsPassworded; }
 		}
 
 		public long Ping
@@ -38,6 +75,10 @@ namespace RxLauncher.ViewModels
 				NotifyPropertyChanged();
 			}
 		}
+		
+		#endregion
+
+		#region Methods
 
 		public async void RefreshPing()
 		{
@@ -56,6 +97,28 @@ namespace RxLauncher.ViewModels
 			}
 		}
 
+		/// <summary>
+		/// Returns a string that represents the current object.
+		/// </summary>
+		/// <returns>
+		/// A string that represents the current object.
+		/// </returns>
+		public override string ToString()
+		{
+			return String.Format("{0} ({1}:{2})", Name, IP, Port);
+		}
+		
+		#endregion
+
+		#region Conversion methods
+
+		public static ServerViewModel FromServer(Server p)
+		{
+			return new ServerViewModel(p);
+		}
+
+		#endregion
+		
 		#region Implementation of INotifyPropertyChanged
 
 		public event PropertyChangedEventHandler PropertyChanged;

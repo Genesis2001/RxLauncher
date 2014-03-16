@@ -6,12 +6,14 @@
 
 namespace RxLauncher
 {
+	using System.Threading.Tasks;
 	using System.Windows;
 	using ViewModels;
+	using Views;
 
 	public partial class App
 	{
-		protected ViewModel viewModel;
+		protected MainViewModel viewModel;
 
 		#region Overrides of Application
 
@@ -27,9 +29,16 @@ namespace RxLauncher
 			}
 
 			viewModel = new MainViewModel();
-
+			
 			MainWindow.DataContext = viewModel;
 			MainWindow.Show();
+
+			Task.Factory.StartNew(async () =>
+			                      {
+									  await Task.Delay(2000);
+
+									  viewModel.ServerList.UpdateServerList();
+			                      });
 		}
 
 		#endregion

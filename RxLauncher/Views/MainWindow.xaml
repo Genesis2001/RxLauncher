@@ -1,0 +1,82 @@
+﻿<Window x:Class="RxLauncher.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:viewModels="clr-namespace:RxLauncher.ViewModels"
+		xmlns:prop="clr-namespace:RxLauncher.Properties"
+		mc:Ignorable="d"
+        Title="MainWindow"
+		WindowStartupLocation="CenterScreen"
+		d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
+		Width="1024" Height="768">
+	
+	<DockPanel>
+		<Grid DockPanel.Dock="Top" Height="75">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			
+			<Image Grid.Column="1"
+				   Margin="0,8" HorizontalAlignment="Center"
+				   Source="/RxLauncher;component/Resources/Images/RenX_Logo.png" />
+		</Grid>
+		
+		<StatusBar DockPanel.Dock="Bottom">
+			<StatusBarItem>
+				<Label Content="{Binding Path=ServerList.Servers.CurrentItem, TargetNullValue={x:Static prop:Resources.DefaultServerSelectionText}}" />
+			</StatusBarItem>
+		</StatusBar>
+		
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<ToolBar Grid.Column="1" Grid.Row="0"
+					 ToolBarTray.IsLocked="True">
+				<Button ToolBar.OverflowMode="Never" Content="Refresh" />
+			</ToolBar>
+			
+			<DataGrid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"
+			          ItemsSource="{Binding ServerList.Servers}" CurrentItem="{Binding ServerList.Selected}"
+					  CanUserReorderColumns="False" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+					  HorizontalScrollBarVisibility="Disabled">
+				
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Server" Binding="{Binding Name}" Width="*" />
+					<DataGridTemplateColumn Header="Players" SortMemberPath="Players">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Text="{Binding Players}" />
+									<TextBlock Text="/" />
+									<TextBlock Text="{Binding MaxPlayers}" />
+								</StackPanel>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+					<DataGridTextColumn Header="Ping" Binding="{Binding Ping}" />
+				</DataGrid.Columns>
+				
+				<DataGrid.InputBindings>
+					<MouseBinding MouseAction="LeftDoubleClick"
+								  Command="{Binding ServerList.StartCommand}"
+								  CommandParameter="{Binding ServerList.Selected}" />
+				</DataGrid.InputBindings>
+			</DataGrid>
+			
+			<Grid Grid.Row="1" Grid.Column="1" Width="210">
+				<TextBlock Text="hello world" />
+			</Grid>
+		</Grid>
+	</DockPanel>
+</Window>
