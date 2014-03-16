@@ -59,7 +59,7 @@ namespace RxLauncher.ViewModels
 
 			servers            = new ObservableCollection<ServerViewModel>();
 			viewSource         = new CollectionViewSource {Source = servers};
-			viewSource.Filter += OnServerListFilter;
+			viewSource.Filter += ServerListFilter;
 			Servers            = viewSource.View;
 		}
 
@@ -125,7 +125,7 @@ namespace RxLauncher.ViewModels
 
 		#region Methods
 
-		private void OnServerListFilter(object sender, FilterEventArgs e)
+		private void ServerListFilter(object sender, FilterEventArgs e)
 		{
 			ServerViewModel model = e.Item as ServerViewModel;
 			if (model != null)
