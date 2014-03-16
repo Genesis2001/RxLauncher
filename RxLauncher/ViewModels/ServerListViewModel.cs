@@ -14,6 +14,7 @@ namespace RxLauncher.ViewModels
 	using System.Net;
 	using System.Runtime.Serialization.Formatters;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Data;
 	using System.Windows.Input;
@@ -49,6 +50,8 @@ namespace RxLauncher.ViewModels
 		private ServerFilter filter;
 		private readonly ObservableCollection<ServerViewModel> servers;
 
+		private readonly Task pingTask;
+
 		public ServerListViewModel()
 		{
 			tokenSource = new CancellationTokenSource();
@@ -57,10 +60,11 @@ namespace RxLauncher.ViewModels
 			RefreshCommand = new ActionCommand(x => Dispatcher.CurrentDispatcher.InvokeAsync(UpdateServerList), x => true);
 			StartCommand   = new ActionCommand(ConnectTo, x => Selected != null);
 
-			servers            = new ObservableCollection<ServerViewModel>();
-			viewSource         = new CollectionViewSource {Source = servers};
-			viewSource.Filter += ServerListFilter;
-			Servers            = viewSource.View;
+			servers    = new ObservableCollection<ServerViewModel>();
+			viewSource = new CollectionViewSource {Source = servers};
+			Servers    = viewSource.View;
+
+			pingTask   = Task.Factory.StartNew(PingServers, token);
 		}
 
 		~ServerListViewModel()
@@ -125,26 +129,6 @@ namespace RxLauncher.ViewModels
 
 		#region Methods
 
-		private void ServerListFilter(object sender, FilterEventArgs e)
-		{
-			ServerViewModel model = e.Item as ServerViewModel;
-			if (model != null)
-			{
-				if (model.Version != RxVersion) e.Accepted = false;
-
-				if (ShowEmpty && model.Players == 0) e.Accepted = true;
-				if (ShowFull && model.Players == model.MaxPlayers) e.Accepted = true;
-				if (ShowWithBots && model.Bots > 0) e.Accepted = true;
-				if (ShowWithPassword && model.IsPassworded) e.Accepted = true;
-			}
-		}
-
-		public void Refresh(object x)
-		{
-			viewSource.SortDescriptions.Add(new SortDescription("Players", ListSortDirection.Descending));
-			Servers.Refresh();
-		}
-
 		private void ConnectTo(object x)
 		{
 			if (ReferenceEquals(null, x)) return;
@@ -154,6 +138,22 @@ namespace RxLauncher.ViewModels
 			{
 				//  TODO: launch game and join server!
 				MessageBox.Show(string.Format("This will connect to: {0}:{1}", model.IP, model.Port), "Connecting!");
+			}
+		}
+		
+		public void Refresh(object x)
+		{
+			viewSource.SortDescriptions.Add(new SortDescription("Players", ListSortDirection.Descending));
+			Servers.Refresh();
+		}
+		
+		private void PingServers()
+		{
+			while (!pingTask.IsCanceled)
+			{
+				Task.Delay(30000, token).Wait(token);
+
+				UpdateServerPings();
 			}
 		}
 
@@ -194,6 +194,8 @@ namespace RxLauncher.ViewModels
 
 					Application.Current.Dispatcher.Invoke(() => Refresh(this));
 				}
+
+				await Task.Factory.StartNew(() => Application.Current.Dispatcher.InvokeAsync(UpdateServerPings), token);
 			}
 		}
 

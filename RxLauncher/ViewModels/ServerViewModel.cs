@@ -8,10 +8,13 @@ namespace RxLauncher.ViewModels
 {
 	using System;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Net;
 	using System.Net.NetworkInformation;
 	using System.Runtime.CompilerServices;
 	using Models;
+
+	// ReSharper disable InconsistentNaming
 
 	public class ServerViewModel : IObservableClass
 	{
@@ -42,14 +45,14 @@ namespace RxLauncher.ViewModels
 		
 		public int MaxPlayers
 		{
-			get { return server.MaxPlayers; }
+			get { return server.Settings.PlayerLimit; }
 		}
 
 		public string Version
 		{
 			get { return server.Version; }
 		}
-
+		
 		public string IP
 		{
 			get { return server.ServerAddress; }
@@ -62,7 +65,7 @@ namespace RxLauncher.ViewModels
 
 		public bool IsPassworded
 		{
-			get { return server.IsPassworded; }
+			get { return server.Settings.IsPassworded; }
 		}
 
 		public long Ping
@@ -91,9 +94,11 @@ namespace RxLauncher.ViewModels
 
 			using (var p = new Ping())
 			{
-				PingReply reply = await p.SendPingAsync(address, 120);
+				PingReply reply = await p.SendPingAsync(address, 1500);
 
-				Ping = reply.RoundtripTime;
+				Ping = reply.Status == IPStatus.Success ? reply.RoundtripTime : 999;
+
+				Debug.WriteLine("IP: {0} Status: {1}", IP, reply.Status);
 			}
 		}
 
@@ -143,4 +148,6 @@ namespace RxLauncher.ViewModels
 
 		#endregion
 	}
+
+	// ReSharper enable InconsistentNaming
 }

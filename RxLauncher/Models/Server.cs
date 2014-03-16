@@ -7,9 +7,7 @@
 namespace RxLauncher.Models
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json;
-	using Newtonsoft.Json.Converters;
 
 	[Serializable]
 	public class Server
@@ -20,21 +18,6 @@ namespace RxLauncher.Models
 
 		public int Players { get; set; }
 
-		[JsonIgnore]
-		public int MaxPlayers
-		{
-			get
-			{
-				object result;
-				if (Variables != null && Variables.TryGetValue("Player Limit", out result))
-				{
-					return result is int ? (int)result : int.MaxValue;
-				}
-
-				return -1;
-			}
-		}
-
 		[JsonProperty("Game Version")]
 		public string Version { get; set; }
 		
@@ -43,23 +26,8 @@ namespace RxLauncher.Models
 
 		public int Port { get; set; }
 
-		[JsonIgnore]
-		public bool IsPassworded
-		{
-			get
-			{
-				object oResult;
-				if (Variables != null && Variables.TryGetValue("bPassword", out oResult))
-				{
-					return oResult is bool && (bool)oResult;
-				}
-
-				return false;
-			}
-		}
-
-		[JsonConverter(typeof (KeyValuePairConverter))]
-		public Dictionary<string, object> Variables { get; private set; }
+		[JsonProperty("Variables")]
+		public ServerSettings Settings { get; set; }
 
 		#region Overrides of Object
 
@@ -75,5 +43,37 @@ namespace RxLauncher.Models
 		}
 
 		#endregion
+
+		[Serializable, JsonObject("Variables")]
+		public class ServerSettings
+		{
+
+			[JsonProperty("bAllowPrivateMessaging")]
+			public bool AllowPrivateMessaging { get; set; }
+
+			[JsonProperty("bAutoBalanceTeams")]
+			public bool IsAutoBalancedEnabled { get; set; }
+
+			[JsonProperty("bPassworded")]
+			public bool IsPassworded { get; set; }
+
+			[JsonProperty("bSteamRequired")]
+			public bool IsSteamRequired { get; set; }
+
+			[JsonProperty("Map Name"), JsonIgnore]
+			public string MapName { get; set; }
+
+			[JsonProperty("Mine Limit")]
+			public int MineLimit { get; set; }
+
+			[JsonProperty("Player Limit")]
+			public int PlayerLimit { get; set; }
+
+			[JsonProperty("Time Limit")]
+			public int TimeLimit { get; set; }
+
+			[JsonProperty("Vehicle Limit")]
+			public int VehicleLimit { get; set; }
+		}
 	}
 }

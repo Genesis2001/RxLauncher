@@ -40,16 +40,46 @@
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
-
-			<ToolBar Grid.Column="1" Grid.Row="0"
-					 ToolBarTray.IsLocked="True">
-				<Button ToolBar.OverflowMode="Never" Content="Refresh" />
-			</ToolBar>
 			
-			<DataGrid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"
+			<StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+				<Label Content="Show:" />
+				<CheckBox IsChecked="{Binding ServerList.ShowEmpty}">
+					<Label Content="Empty" />
+				</CheckBox>
+				
+				<CheckBox IsChecked="{Binding ServerList.ShowFull}">
+					<Label Content="Full" />
+				</CheckBox>
+				
+				<CheckBox IsChecked="{Binding ServerList.ShowWithBots}">
+					<Label Content="With bots" />
+				</CheckBox>
+				
+				<CheckBox IsChecked="{Binding ServerList.ShowWithPassword}">
+					<Label Content="Passworded" />
+				</CheckBox>
+			</StackPanel>
+			
+			<DataGrid Grid.Column="0" Grid.Row="1"
 			          ItemsSource="{Binding ServerList.Servers}" CurrentItem="{Binding ServerList.Selected}"
-					  CanUserReorderColumns="False" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+					  CanUserReorderColumns="False" AutoGenerateColumns="False" IsReadOnly="True"
+					  SelectionMode="Single" SelectionUnit="FullRow"
 					  HorizontalScrollBarVisibility="Disabled">
+				
+				<DataGrid.Resources>
+					<ContextMenu x:Key="ServerRowContext">
+						<MenuItem Header="Join" Command="{Binding ServerList.StartCommand}" CommandParameter="{Binding ServerList.Selected}" />
+						<MenuItem Header="Refresh" />
+						<Separator />
+						<MenuItem Header="Add to favorites" IsEnabled="False" />
+					</ContextMenu>
+				</DataGrid.Resources>
+				
+				<DataGrid.RowStyle>
+					<Style TargetType="DataGridRow">
+						<Setter Property="ContextMenu" Value="{DynamicResource ServerRowContext}" />
+					</Style>
+				</DataGrid.RowStyle>
 				
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Server" Binding="{Binding Name}" Width="*" />
@@ -74,7 +104,7 @@
 				</DataGrid.InputBindings>
 			</DataGrid>
 			
-			<Grid Grid.Row="1" Grid.Column="1" Width="210">
+			<Grid Grid.Row="1" Grid.Column="1" Width="300">
 				<TextBlock Text="hello world" />
 			</Grid>
 		</Grid>

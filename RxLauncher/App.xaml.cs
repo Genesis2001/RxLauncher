@@ -33,11 +33,11 @@ namespace RxLauncher
 			MainWindow.DataContext = viewModel;
 			MainWindow.Show();
 
-			Task.Factory.StartNew(async () =>
+			Task.Factory.StartNew(() =>
 			                      {
-									  await Task.Delay(2000);
+				                      Task.Delay(1000).Wait();
 
-									  viewModel.ServerList.UpdateServerList();
+				                      viewModel.ServerList.UpdateServerList();
 			                      });
 		}
 
