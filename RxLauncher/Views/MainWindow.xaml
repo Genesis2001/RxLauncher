@@ -68,7 +68,7 @@
 				
 				<DataGrid.Resources>
 					<ContextMenu x:Key="ServerRowContext">
-						<MenuItem Header="Join" Command="{Binding ServerList.StartCommand}" CommandParameter="{Binding ServerList.Selected}" />
+						<MenuItem Header="Join" Command="{Binding StartCommand}" />
 						<MenuItem Header="Refresh" />
 						<Separator />
 						<MenuItem Header="Add to favorites" IsEnabled="False" />

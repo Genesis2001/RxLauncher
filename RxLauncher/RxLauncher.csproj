@@ -60,6 +60,7 @@
     <Compile Include="Commands\ActionCommand.cs" />
     <Compile Include="Converters\BoolToStatusConverter.cs" />
     <Compile Include="IObservableClass.cs" />
+    <Compile Include="Models\Configuration.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ServerListViewModel.cs" />
     <Compile Include="ViewModels\ServerViewModel.cs" />
@@ -106,7 +107,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Config.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\error.png" />
     <Resource Include="Resources\Images\info.png" />
