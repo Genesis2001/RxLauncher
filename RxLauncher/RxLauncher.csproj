@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\build\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,6 +32,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>renx.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -59,7 +62,9 @@
     </ApplicationDefinition>
     <Compile Include="Commands\ActionCommand.cs" />
     <Compile Include="Converters\BoolToStatusConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="IObservableClass.cs" />
+    <Compile Include="IoCContainer.cs" />
     <Compile Include="Models\Configuration.cs" />
     <Compile Include="Models\ConfigurationManager.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -109,22 +114,30 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Config.xml">
+    <None Include="Config.xml">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\error.png" />
     <Resource Include="Resources\Images\info.png" />
-    <Resource Include="Resources\Images\RenX_Logo.png" />
     <Resource Include="Resources\Images\success.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-field.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-goldrush.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-hourglassii.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-island.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-lakeside.png" />
-    <Resource Include="Resources\Images\___map-pic-cnc-mesaii.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\bg.jpg" />
+    <Resource Include="Resources\Images\Maps\cnc-field.png" />
+    <Resource Include="Resources\Images\Maps\cnc-goldrush.png" />
+    <Resource Include="Resources\Images\Maps\cnc-hourglassii.png" />
+    <Resource Include="Resources\Images\Maps\cnc-island.png" />
+    <Resource Include="Resources\Images\Maps\cnc-lakeside.png" />
+    <Resource Include="Resources\Images\Maps\cnc-mesaii.png" />
+    <Resource Include="Resources\Images\Maps\cnc-walls.png" />
+    <Resource Include="Resources\Images\RenegadeX.ico" />
+    <Resource Include="Resources\Images\RenegadeXLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="renx.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

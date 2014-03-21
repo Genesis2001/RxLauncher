@@ -5,11 +5,16 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:viewModels="clr-namespace:RxLauncher.ViewModels"
 		xmlns:prop="clr-namespace:RxLauncher.Properties"
+		xmlns:c="clr-namespace:RxLauncher.Converters"
 		mc:Ignorable="d"
         Title="MainWindow"
 		WindowStartupLocation="CenterScreen"
 		d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
-		Width="1024" Height="768">
+		Width="1024" Height="720">
+	
+	<Window.Resources>
+		<c:NullToVisibilityConverter x:Key="NullConverter" />
+	</Window.Resources>
 	
 	<DockPanel>
 		<Grid DockPanel.Dock="Top" Height="75">
@@ -19,9 +24,9 @@
 				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
 			
-			<Image Grid.Column="1"
+			<!--<Image Grid.Column="1"
 				   Margin="0,8" HorizontalAlignment="Center"
-				   Source="/RxLauncher;component/Resources/Images/RenX_Logo.png" />
+				   Source="/RxLauncher;component/Resources/Images/RenX_Logo.png" />-->
 		</Grid>
 		
 		<StatusBar DockPanel.Dock="Bottom">
@@ -42,71 +47,62 @@
 			</Grid.ColumnDefinitions>
 			
 			<StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
-				<Label Content="Show:" />
+				<TextBlock Text="Show:" />
 				<CheckBox IsChecked="{Binding ServerList.ShowEmpty}">
-					<Label Content="Empty" />
+					<TextBlock Text="Empty" />
 				</CheckBox>
 				
 				<CheckBox IsChecked="{Binding ServerList.ShowFull}">
-					<Label Content="Full" />
+					<TextBlock Text="Full" />
 				</CheckBox>
 				
 				<CheckBox IsChecked="{Binding ServerList.ShowWithBots}">
-					<Label Content="With bots" />
+					<TextBlock Text="With bots" />
 				</CheckBox>
 				
 				<CheckBox IsChecked="{Binding ServerList.ShowWithPassword}">
-					<Label Content="Passworded" />
+					<TextBlock Text="Passworded" />
 				</CheckBox>
 			</StackPanel>
 			
-			<DataGrid Grid.Column="0" Grid.Row="1"
-			          ItemsSource="{Binding ServerList.Servers}" CurrentItem="{Binding ServerList.Selected}"
+			<DataGrid x:Name="ServerList" Grid.Column="0" Grid.Row="1"
+			          ItemsSource="{Binding ServerList.Servers}"
+					  CurrentItem="{Binding ServerList.Selected}"
 					  CanUserReorderColumns="False" AutoGenerateColumns="False" IsReadOnly="True"
 					  SelectionMode="Single" SelectionUnit="FullRow"
 					  HorizontalScrollBarVisibility="Disabled">
 				
 				<DataGrid.Resources>
-					<ContextMenu x:Key="ServerRowContext">
-						<MenuItem Header="Join" Command="{Binding StartCommand}" />
+					<ContextMenu x:Key="ServerContextMneu">
+						<MenuItem Header="Join" Command="{Binding JoinServerCommand}" />
 						<MenuItem Header="Refresh" />
 						<Separator />
-						<MenuItem Header="Add to favorites" IsEnabled="False" />
+						<MenuItem Header="Add to favorites" Command="{Binding AddFavoriteCommand}" />
 					</ContextMenu>
 				</DataGrid.Resources>
 				
 				<DataGrid.RowStyle>
 					<Style TargetType="DataGridRow">
-						<Setter Property="ContextMenu" Value="{DynamicResource ServerRowContext}" />
+						<Setter Property="ContextMenu" Value="{DynamicResource ServerContextMneu}" />
 					</Style>
 				</DataGrid.RowStyle>
 				
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Server" Binding="{Binding Name}" Width="*" />
-					<DataGridTemplateColumn Header="Players" SortMemberPath="Players">
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate>
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Text="{Binding Players}" />
-									<TextBlock Text="/" />
-									<TextBlock Text="{Binding MaxPlayers}" />
-								</StackPanel>
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
+					<DataGridTextColumn Header="Players" Binding="{Binding PlayerSummary}" SortMemberPath="Players" />
 					<DataGridTextColumn Header="Ping" Binding="{Binding Ping}" />
 				</DataGrid.Columns>
 				
 				<DataGrid.InputBindings>
 					<MouseBinding MouseAction="LeftDoubleClick"
-								  Command="{Binding ServerList.StartCommand}"
-								  CommandParameter="{Binding ServerList.Selected}" />
+								  Command="{Binding ServerList.JoinServerCommand}"
+								  CommandParameter="{Binding ElementName=ServerList, Path=CurrentItem}" />
 				</DataGrid.InputBindings>
 			</DataGrid>
 			
-			<Grid Grid.Row="1" Grid.Column="1" Width="300">
-				<TextBlock Text="hello world" />
-			</Grid>
+			<ContentControl Grid.Row="1" Grid.Column="1" Width="250"
+							Content="{Binding ServerList.Selected}"
+							Visibility="{Binding Converter={StaticResource NullConverter}, ElementName=ServerList, Path=CurrentItem}" />
 		</Grid>
 	</DockPanel>
 </Window>

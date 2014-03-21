@@ -6,18 +6,32 @@
 
 namespace RxLauncher.ViewModels
 {
+	using System;
+	using Models;
+
 	public class MainViewModel : ViewModel
 	{
-		private string userName;
+		private String userName;
+		private IoCContainer iocc;
 
 		public MainViewModel()
 		{
-			ServerList = new ServerListViewModel();
+			iocc = new IoCContainer();
+
+			iocc.RegisterContract(this);
+			iocc.RegisterContract(ConfigurationManager.Instance);
+
+			ServerList = iocc.RegisterContract(new ServerListViewModel(iocc));
+		}
+
+		~MainViewModel()
+		{
+			ConfigurationManager.Save(ConfigurationManager.Instance, "Config.xml");
 		}
 
 		public ServerListViewModel ServerList { get; private set; }
 
-		public string UserName
+		public String UserName
 		{
 			get { return userName; }
 			set

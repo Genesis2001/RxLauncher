@@ -6,11 +6,14 @@
 
 namespace RxLauncher.ViewModels
 {
+	using System;
 	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.Net;
 	using System.Net.NetworkInformation;
+	using System.Net.Sockets;
 	using System.Runtime.CompilerServices;
+	using System.Windows;
 	using System.Windows.Input;
 	using Commands;
 	using Models;
@@ -20,27 +23,43 @@ namespace RxLauncher.ViewModels
 	public class ServerViewModel : IObservableClass
 	{
 		private readonly Server server;
-		private long ping;
+		private readonly IoCContainer iocc;
+		private Int64 ping;
 
 		private ICommand joinServerCommand;
+		private ICommand addFavoriteCommand;
+		private ICommand delFavoriteCommand;
 
-		private ServerViewModel(Server server)
+		private readonly ServerListViewModel serverList;
+
+		private ServerViewModel(Server server, IoCContainer iocc)
 		{
 			this.server = server;
+			this.iocc   = iocc;
+			
+			serverList  = iocc.RetrieveContract<ServerListViewModel>();
 		}
 
 		#region Commands
 
 		public ICommand JoinServerCommand
 		{
+			get { return joinServerCommand ?? (joinServerCommand = new ActionCommand(JoinServer, o => true)); }
+		}
+
+		public ICommand AddFavoriteCommand
+		{
 			get
 			{
-				if (joinServerCommand == null)
-				{
-					joinServerCommand = new ActionCommand(JoinServer, o => true);
-				}
+				return addFavoriteCommand ?? (addFavoriteCommand = new ActionCommand(x => serverList.AddFavorite(server), x => true));
+			}
+		}
 
-				return joinServerCommand;
+		public ICommand DelFavoriteCommand
+		{
+			get
+			{
+				return delFavoriteCommand ?? (delFavoriteCommand = new ActionCommand(x => serverList.RemoveFavorite(server), x => true));
 			}
 		}
 
@@ -48,47 +67,52 @@ namespace RxLauncher.ViewModels
 		
 		#region Properties
 
-		public string Name
+		public String Name
 		{
 			get { return server.Name; }
 		}
 
-		public int Bots
+		public Int32 Bots
 		{
 			get { return server.Bots; }
 		}
 
-		public int Players
+		public Int32 Players
 		{
 			get { return server.Players; }
 		}
-		
-		public int MaxPlayers
+
+		public string PlayerSummary
+		{
+			get { return String.Join("/", Players, MaxPlayers); }
+		}
+
+		public Int32 MaxPlayers
 		{
 			get { return server.Settings.PlayerLimit; }
 		}
 
-		public string Version
+		public String Version
 		{
 			get { return server.Version; }
 		}
 		
-		public string IP
+		public String IP
 		{
 			get { return server.ServerAddress; }
 		}
 
-		public int Port
+		public Int32 Port
 		{
 			get { return server.Port; }
 		}
 
-		public bool IsPassworded
+		public Boolean IsPassworded
 		{
 			get { return server.Settings.IsPassworded; }
 		}
 
-		public long Ping
+		public Int64 Ping
 		{
 			get { return ping; }
 			private set
@@ -124,9 +148,7 @@ namespace RxLauncher.ViewModels
 
 		public void JoinServer(object o)
 		{
-			if (!(o is ServerViewModel)) return;
-
-			// MessageBox.Show(String.Format("This will join: {0}:{1}", IP, Port), "Joining...");
+			MessageBox.Show(string.Format("This will connect to: {0}:{1}", IP, Port), "Connecting!");
 		}
 
 		/// <summary>
@@ -144,9 +166,9 @@ namespace RxLauncher.ViewModels
 
 		#region Conversion methods
 
-		public static ServerViewModel FromServer(Server p)
+		public static ServerViewModel FromServer(Server p, IoCContainer iocc = null)
 		{
-			return new ServerViewModel(p);
+			return new ServerViewModel(p, iocc);
 		}
 
 		#endregion

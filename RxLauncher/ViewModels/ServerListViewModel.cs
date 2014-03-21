@@ -7,6 +7,7 @@
 namespace RxLauncher.ViewModels
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.ComponentModel;
@@ -18,7 +19,6 @@ namespace RxLauncher.ViewModels
 	using System.Windows;
 	using System.Windows.Data;
 	using System.Windows.Input;
-	using System.Windows.Threading;
 	using Commands;
 	using Models;
 	using Newtonsoft.Json;
@@ -35,6 +35,7 @@ namespace RxLauncher.ViewModels
 
 	public class ServerListViewModel : ViewModel
 	{
+		private readonly IoCContainer iocc;
 		public const string RxServerList = "http://renegadexgs.appspot.com/servers.jsp";
 		public const string RxVersion    = "Open Beta 2";
 
@@ -50,26 +51,32 @@ namespace RxLauncher.ViewModels
 		private ServerFilter filter;
 		private readonly ObservableCollection<ServerViewModel> servers;
 
+		private readonly Configuration config;
+
 		private readonly Task pingTask;
 
-		public ServerListViewModel()
+		public ServerListViewModel(IoCContainer iocc)
 		{
+			this.iocc   = iocc;
+			config      = iocc.RetrieveContract<Configuration>();
+
 			tokenSource = new CancellationTokenSource();
 			token       = tokenSource.Token;
 
 			RefreshCommand    = new ActionCommand(x => Application.Current.Dispatcher.InvokeAsync(UpdateServerList), x => true);
-			JoinServerCommand = new ActionCommand(ConnectTo, x => Selected != null);
+			JoinServerCommand = new ActionCommand(ConnectTo, x => Servers.CurrentItem != null);
 
 			servers    = new ObservableCollection<ServerViewModel>();
 			viewSource = new CollectionViewSource {Source = servers};
+			viewSource.SortDescriptions.Add(new SortDescription("Players", ListSortDirection.Descending));
 			viewSource.Filter += (s, e) =>
 			                     {
 				                     ServerViewModel model = e.Item as ServerViewModel;
 
 				                     e.Accepted = model != null && model.Version.Equals(RxVersion, StringComparison.OrdinalIgnoreCase);
 			                     };
-			Servers    = viewSource.View;
 
+			Servers    = viewSource.View;
 			pingTask   = Task.Factory.StartNew(PingServers, token);
 		}
 
@@ -93,7 +100,11 @@ namespace RxLauncher.ViewModels
 		public ServerViewModel Selected
 		{
 			get { return (ServerViewModel)Servers.CurrentItem; }
-			set { Servers.MoveCurrentTo(value); }
+			set
+			{
+				Servers.MoveCurrentTo(value);
+				MessageBox.Show("Selection set!");
+			}
 		}
 
 		public bool ShowEmpty
@@ -140,20 +151,38 @@ namespace RxLauncher.ViewModels
 
 		#region Methods
 
+		/// <summary>
+		/// Adds a server from the favorites list.
+		/// </summary>
+		/// <param name="server"></param>
+		public void AddFavorite(Server server)
+		{
+			if (!config.Servers.Any(x => x.Equals(server)))
+			{
+				config.Servers.Add(server);
+			}
+		}
+
+		public void RemoveFavorite(Server server)
+		{
+			if (config.Servers.Any(x => x.Equals(server)))
+			{
+				int index = config.Servers.IndexOf(server);
+
+				config.Servers.RemoveAt(index);
+			}
+		}
+
 		private void ConnectTo(object x)
 		{
 			if (ReferenceEquals(null, x)) return;
 			if (!(x is ServerViewModel)) return;
 
-			ServerViewModel model = x as ServerViewModel;
-			model.JoinServer(model);
-			//  TODO: launch game and join server!
-			MessageBox.Show(string.Format("This will connect to: {0}:{1}", model.IP, model.Port), "Connecting!");
+			((ServerViewModel)x).JoinServer(x);
 		}
 		
-		public void Refresh(object x)
+		public void Refresh(object x = null)
 		{
-			viewSource.SortDescriptions.Add(new SortDescription("Players", ListSortDirection.Descending));
 			Servers.Refresh();
 		}
 		
@@ -194,7 +223,7 @@ namespace RxLauncher.ViewModels
 						{
 							int index = servers.IndexOf(s);
 
-							s = ServerViewModel.FromServer(item);
+							s = ServerViewModel.FromServer(item, iocc);
 							Application.Current.Dispatcher.Invoke(() =>
 							                                    {
 								                                    servers.RemoveAt(index);
@@ -203,7 +232,7 @@ namespace RxLauncher.ViewModels
 						}
 						else
 						{
-							s = ServerViewModel.FromServer(item);
+							s = ServerViewModel.FromServer(item, iocc);
 
 							Application.Current.Dispatcher.Invoke(() => servers.Add(s));
 						}

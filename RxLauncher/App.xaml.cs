@@ -8,6 +8,7 @@ namespace RxLauncher
 {
 	using System.Threading.Tasks;
 	using System.Windows;
+	using Models;
 	using ViewModels;
 	using Views;
 

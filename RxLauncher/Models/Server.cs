@@ -7,29 +7,46 @@
 namespace RxLauncher.Models
 {
 	using System;
+	using System.Xml.Serialization;
 	using Newtonsoft.Json;
 
-	[Serializable]
-	public class Server
+	[Serializable, XmlRoot("Server")]
+	public class Server : IEquatable<Server>
 	{
+		[XmlIgnore]
 		public string Name { get; set; }
 
+		[XmlIgnore]
 		public int Bots { get; set; }
 
+		[XmlIgnore]
 		public int Players { get; set; }
 
-		[JsonProperty("Game Version")]
+		[JsonProperty("Game Version"), XmlIgnore]
 		public string Version { get; set; }
 		
-		[JsonProperty("IP")]
+		[JsonProperty("IP"), XmlAttribute("address")]
 		public string ServerAddress { get; set; }
 
+		[XmlAttribute("port")]
 		public int Port { get; set; }
 
-		[JsonProperty("Variables")]
+		[JsonProperty("Variables"), XmlIgnore]
 		public ServerSettings Settings { get; set; }
 
 		#region Overrides of Object
+
+		/// <summary>
+		/// Indicates whether the current object is equal to another object of the same type.
+		/// </summary>
+		/// <returns>
+		/// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+		/// </returns>
+		/// <param name="other">An object to compare with this object.</param>
+		public bool Equals(Server other)
+		{
+			return ServerAddress.Equals(other.ServerAddress, StringComparison.OrdinalIgnoreCase) && Port.Equals(other.Port);
+		}
 
 		/// <summary>
 		/// Returns a string that represents the current object.

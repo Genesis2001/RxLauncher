@@ -2,9 +2,4 @@
 
 <Config>
 	<InstallationPath>F:\Games\Renegade X\Binaries\Win32\UDK.exe</InstallationPath>
-	
-	<Favorites>
-		<Server Address="198.100.156.237" Port="7782" />
-		<Server Address="198.100.156.237" Port="7783" />
-	</Favorites>
 </Config>

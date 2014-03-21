@@ -7,21 +7,16 @@
 namespace RxLauncher.Models
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Xml.Serialization;
 
 	[Serializable, XmlRoot("Config")]
 	public class Configuration
 	{
 		[XmlElement("InstallationPath")]
-		public string InstallationPath { get; private set; }
+		public string InstallationPath { get; set; }
 
-		[XmlArrayItem(Type = typeof(ServerInfo))]
-		public ServerInfo[] Favorites { get; private set; }
-
-		public struct ServerInfo
-		{
-			public string Address;
-			public int Port;
-		}
+		[XmlArray("Favorites")]
+		public List<Server> Servers { get; set; }
 	}
 }
