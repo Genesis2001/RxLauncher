@@ -36,7 +36,7 @@ namespace RxLauncher.ViewModels
 	public class ServerListViewModel : ViewModel
 	{
 		public const string RxServerList = "http://renegadexgs.appspot.com/servers.jsp";
-		public const string RxVersion    = "Open Beta 1";
+		public const string RxVersion    = "Open Beta 2";
 
 		private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
 		                                                              {
@@ -44,9 +44,9 @@ namespace RxLauncher.ViewModels
 			                                                              TypeNameAssemblyFormat = FormatterAssemblyStyle.Full,
 		                                                              };
 
-		private CancellationToken token;
+		private readonly CancellationToken token;
 		private readonly CancellationTokenSource tokenSource;
-		private CollectionViewSource viewSource;
+		private readonly CollectionViewSource viewSource;
 		private ServerFilter filter;
 		private readonly ObservableCollection<ServerViewModel> servers;
 
@@ -57,11 +57,17 @@ namespace RxLauncher.ViewModels
 			tokenSource = new CancellationTokenSource();
 			token       = tokenSource.Token;
 
-			RefreshCommand = new ActionCommand(x => Dispatcher.CurrentDispatcher.InvokeAsync(UpdateServerList), x => true);
-			StartCommand   = new ActionCommand(ConnectTo, x => Selected != null);
+			RefreshCommand    = new ActionCommand(x => Application.Current.Dispatcher.InvokeAsync(UpdateServerList), x => true);
+			JoinServerCommand = new ActionCommand(ConnectTo, x => Selected != null);
 
 			servers    = new ObservableCollection<ServerViewModel>();
 			viewSource = new CollectionViewSource {Source = servers};
+			viewSource.Filter += (s, e) =>
+			                     {
+				                     ServerViewModel model = e.Item as ServerViewModel;
+
+				                     e.Accepted = model != null && model.Version.Equals(RxVersion, StringComparison.OrdinalIgnoreCase);
+			                     };
 			Servers    = viewSource.View;
 
 			pingTask   = Task.Factory.StartNew(PingServers, token);
@@ -72,17 +78,22 @@ namespace RxLauncher.ViewModels
 			tokenSource.Cancel();
 		}
 
-		#region Properties
+		#region Commands
 
 		public ICommand RefreshCommand { get; private set; }
 
-		public ICommand StartCommand { get; private set; }
+		public ICommand JoinServerCommand { get; private set; }
+
+		#endregion
+
+		#region Properties
 
 		public ICollectionView Servers { get; private set; }
 
 		public ServerViewModel Selected
 		{
 			get { return (ServerViewModel)Servers.CurrentItem; }
+			set { Servers.MoveCurrentTo(value); }
 		}
 
 		public bool ShowEmpty
@@ -132,13 +143,12 @@ namespace RxLauncher.ViewModels
 		private void ConnectTo(object x)
 		{
 			if (ReferenceEquals(null, x)) return;
+			if (!(x is ServerViewModel)) return;
 
 			ServerViewModel model = x as ServerViewModel;
-			if (model != null)
-			{
-				//  TODO: launch game and join server!
-				MessageBox.Show(string.Format("This will connect to: {0}:{1}", model.IP, model.Port), "Connecting!");
-			}
+			model.JoinServer(model);
+			//  TODO: launch game and join server!
+			MessageBox.Show(string.Format("This will connect to: {0}:{1}", model.IP, model.Port), "Connecting!");
 		}
 		
 		public void Refresh(object x)
@@ -149,11 +159,18 @@ namespace RxLauncher.ViewModels
 		
 		private void PingServers()
 		{
-			while (!pingTask.IsCanceled)
+			try
 			{
-				Task.Delay(30000, token).Wait(token);
+				while (!pingTask.IsCanceled)
+				{
+					Task.Delay(2 * 60 * 1000, token).Wait(token);
 
-				UpdateServerPings();
+					UpdateServerPings();
+				}
+			}
+			catch (TaskCanceledException)
+			{
+				// nomnomnom.
 			}
 		}
 

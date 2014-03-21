@@ -6,12 +6,13 @@
 
 namespace RxLauncher.ViewModels
 {
-	using System;
 	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.Net;
 	using System.Net.NetworkInformation;
 	using System.Runtime.CompilerServices;
+	using System.Windows.Input;
+	using Commands;
 	using Models;
 
 	// ReSharper disable InconsistentNaming
@@ -21,11 +22,30 @@ namespace RxLauncher.ViewModels
 		private readonly Server server;
 		private long ping;
 
+		private ICommand joinServerCommand;
+
 		private ServerViewModel(Server server)
 		{
 			this.server = server;
 		}
 
+		#region Commands
+
+		public ICommand JoinServerCommand
+		{
+			get
+			{
+				if (joinServerCommand == null)
+				{
+					joinServerCommand = new ActionCommand(JoinServer, o => true);
+				}
+
+				return joinServerCommand;
+			}
+		}
+
+		#endregion
+		
 		#region Properties
 
 		public string Name
@@ -102,6 +122,13 @@ namespace RxLauncher.ViewModels
 			}
 		}
 
+		public void JoinServer(object o)
+		{
+			if (!(o is ServerViewModel)) return;
+
+			// MessageBox.Show(String.Format("This will join: {0}:{1}", IP, Port), "Joining...");
+		}
+
 		/// <summary>
 		/// Returns a string that represents the current object.
 		/// </summary>
@@ -110,7 +137,7 @@ namespace RxLauncher.ViewModels
 		/// </returns>
 		public override string ToString()
 		{
-			return String.Format("{0} ({1}:{2})", Name, IP, Port);
+			return Name;
 		}
 		
 		#endregion
