@@ -19,14 +19,16 @@ namespace RxLauncher.ViewModels
 			iocc = new IoCContainer();
 
 			iocc.RegisterContract(this);
-			iocc.RegisterContract(ConfigurationManager.Instance);
+
+			Configuration config = Configuration.Load("Config.xml");
+			iocc.RegisterContract(config);
 
 			ServerList = iocc.RegisterContract(new ServerListViewModel(iocc));
 		}
 
 		~MainViewModel()
 		{
-			ConfigurationManager.Save(ConfigurationManager.Instance, "Config.xml");
+			ServerList.Save();
 		}
 
 		public ServerListViewModel ServerList { get; private set; }

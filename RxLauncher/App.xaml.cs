@@ -8,13 +8,14 @@ namespace RxLauncher
 {
 	using System.Threading.Tasks;
 	using System.Windows;
-	using Models;
 	using ViewModels;
 	using Views;
 
 	public partial class App
 	{
 		protected MainViewModel viewModel;
+
+		// Registry.GetValue(@"HKEY_CURRENT_USER\Software\Totem Arts\Renegade X", "RenXPath", null)
 
 		#region Overrides of Application
 

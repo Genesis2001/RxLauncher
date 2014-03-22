@@ -11,7 +11,6 @@ namespace RxLauncher.ViewModels
 	using System.Diagnostics;
 	using System.Net;
 	using System.Net.NetworkInformation;
-	using System.Net.Sockets;
 	using System.Runtime.CompilerServices;
 	using System.Windows;
 	using System.Windows.Input;
@@ -20,24 +19,22 @@ namespace RxLauncher.ViewModels
 
 	// ReSharper disable InconsistentNaming
 
-	public class ServerViewModel : IObservableClass
+	public class ServerViewModel : IObservableClass, IEquatable<Server>
 	{
-		private readonly Server server;
 		private readonly IoCContainer iocc;
-		private Int64 ping;
-
-		private ICommand joinServerCommand;
+		private readonly Server server;
+		private readonly ServerListViewModel serverList;
 		private ICommand addFavoriteCommand;
 		private ICommand delFavoriteCommand;
-
-		private readonly ServerListViewModel serverList;
+		private ICommand joinServerCommand;
+		private Int64 ping;
 
 		private ServerViewModel(Server server, IoCContainer iocc)
 		{
 			this.server = server;
-			this.iocc   = iocc;
-			
-			serverList  = iocc.RetrieveContract<ServerListViewModel>();
+			this.iocc = iocc;
+
+			serverList = iocc.RetrieveContract<ServerListViewModel>();
 		}
 
 		#region Commands
@@ -49,23 +46,19 @@ namespace RxLauncher.ViewModels
 
 		public ICommand AddFavoriteCommand
 		{
-			get
-			{
-				return addFavoriteCommand ?? (addFavoriteCommand = new ActionCommand(x => serverList.AddFavorite(server), x => true));
-			}
+			get { return addFavoriteCommand ?? (addFavoriteCommand = new ActionCommand(x => IsFavorited = true, x => true)); }
 		}
 
 		public ICommand DelFavoriteCommand
 		{
-			get
-			{
-				return delFavoriteCommand ?? (delFavoriteCommand = new ActionCommand(x => serverList.RemoveFavorite(server), x => true));
-			}
+			get { return delFavoriteCommand ?? (delFavoriteCommand = new ActionCommand(x => IsFavorited = false, x => true)); }
 		}
 
 		#endregion
-		
+
 		#region Properties
+
+		private bool isFavorited;
 
 		public String Name
 		{
@@ -96,7 +89,7 @@ namespace RxLauncher.ViewModels
 		{
 			get { return server.Version; }
 		}
-		
+
 		public String IP
 		{
 			get { return server.ServerAddress; }
@@ -112,6 +105,17 @@ namespace RxLauncher.ViewModels
 			get { return server.Settings.IsPassworded; }
 		}
 
+		public bool IsFavorited
+		{
+			get { return isFavorited; }
+			set
+			{
+				NotifyPropertyChanging();
+				isFavorited = value;
+				NotifyPropertyChanged();
+			}
+		}
+
 		public Int64 Ping
 		{
 			get { return ping; }
@@ -122,7 +126,7 @@ namespace RxLauncher.ViewModels
 				NotifyPropertyChanged();
 			}
 		}
-		
+
 		#endregion
 
 		#region Methods
@@ -152,16 +156,28 @@ namespace RxLauncher.ViewModels
 		}
 
 		/// <summary>
-		/// Returns a string that represents the current object.
+		/// Indicates whether the current object is equal to another object of the same type.
 		/// </summary>
 		/// <returns>
-		/// A string that represents the current object.
+		/// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+		/// </returns>
+		/// <param name="other">An object to compare with this object.</param>
+		public bool Equals(Server other)
+		{
+			return server.Equals(other);
+		}
+
+		/// <summary>
+		///     Returns a string that represents the current object.
+		/// </summary>
+		/// <returns>
+		///     A string that represents the current object.
 		/// </returns>
 		public override string ToString()
 		{
 			return Name;
 		}
-		
+
 		#endregion
 
 		#region Conversion methods
@@ -171,8 +187,13 @@ namespace RxLauncher.ViewModels
 			return new ServerViewModel(p, iocc);
 		}
 
+		public static Server ToServer(ServerViewModel vm)
+		{
+			return vm.server;
+		}
+
 		#endregion
-		
+
 		#region Implementation of INotifyPropertyChanged
 
 		public event PropertyChangedEventHandler PropertyChanged;

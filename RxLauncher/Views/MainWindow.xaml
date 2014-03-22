@@ -7,10 +7,11 @@
 		xmlns:prop="clr-namespace:RxLauncher.Properties"
 		xmlns:c="clr-namespace:RxLauncher.Converters"
 		mc:Ignorable="d"
-        Title="MainWindow"
+        Title="Renegade-X Launcher"
 		WindowStartupLocation="CenterScreen"
 		d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
-		Width="1024" Height="720">
+		Width="1024" Height="720"
+		Icon="/RxLauncher;component/renx.ico">
 	
 	<Window.Resources>
 		<c:NullToVisibilityConverter x:Key="NullConverter" />

@@ -33,7 +33,7 @@ namespace RxLauncher.Models
 
 		[JsonProperty("Variables"), XmlIgnore]
 		public ServerSettings Settings { get; set; }
-
+		
 		#region Overrides of Object
 
 		/// <summary>
@@ -64,7 +64,6 @@ namespace RxLauncher.Models
 		[Serializable, JsonObject("Variables")]
 		public class ServerSettings
 		{
-
 			[JsonProperty("bAllowPrivateMessaging")]
 			public bool AllowPrivateMessaging { get; set; }
 

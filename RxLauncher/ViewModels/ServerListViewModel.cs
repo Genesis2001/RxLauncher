@@ -68,7 +68,9 @@ namespace RxLauncher.ViewModels
 
 			servers    = new ObservableCollection<ServerViewModel>();
 			viewSource = new CollectionViewSource {Source = servers};
+
 			viewSource.SortDescriptions.Add(new SortDescription("Players", ListSortDirection.Descending));
+
 			viewSource.Filter += (s, e) =>
 			                     {
 				                     ServerViewModel model = e.Item as ServerViewModel;
@@ -151,28 +153,6 @@ namespace RxLauncher.ViewModels
 
 		#region Methods
 
-		/// <summary>
-		/// Adds a server from the favorites list.
-		/// </summary>
-		/// <param name="server"></param>
-		public void AddFavorite(Server server)
-		{
-			if (!config.Servers.Any(x => x.Equals(server)))
-			{
-				config.Servers.Add(server);
-			}
-		}
-
-		public void RemoveFavorite(Server server)
-		{
-			if (config.Servers.Any(x => x.Equals(server)))
-			{
-				int index = config.Servers.IndexOf(server);
-
-				config.Servers.RemoveAt(index);
-			}
-		}
-
 		private void ConnectTo(object x)
 		{
 			if (ReferenceEquals(null, x)) return;
@@ -218,22 +198,28 @@ namespace RxLauncher.ViewModels
 				{
 					foreach (Server item in list)
 					{
-						ServerViewModel s = servers.SingleOrDefault(x => x.IP == item.ServerAddress && x.Port == item.Port);
+						Server f          = config.Favorites.SingleOrDefault(x => x.Equals(item));
+						ServerViewModel s = servers.SingleOrDefault(x => x.Equals(item));
+
 						if (s != null)
 						{
 							int index = servers.IndexOf(s);
 
 							s = ServerViewModel.FromServer(item, iocc);
+
+							s.IsFavorited = f != null;
+
 							Application.Current.Dispatcher.Invoke(() =>
-							                                    {
-								                                    servers.RemoveAt(index);
-								                                    servers.Insert(index, s);
-							                                    });
+							                                      {
+								                                      servers.RemoveAt(index);
+								                                      servers.Insert(index, s);
+							                                      });
 						}
 						else
 						{
 							s = ServerViewModel.FromServer(item, iocc);
 
+							s.IsFavorited = f != null;
 							Application.Current.Dispatcher.Invoke(() => servers.Add(s));
 						}
 					}
@@ -251,6 +237,13 @@ namespace RxLauncher.ViewModels
 			{
 				server.RefreshPing();
 			}
+		}
+
+		public void Save()
+		{
+			config.Favorites = servers.Where(x => x.IsFavorited).Select(ServerViewModel.ToServer).ToList();
+
+			Configuration.Save(config, "Config.xml");
 		}
 
 		#endregion
