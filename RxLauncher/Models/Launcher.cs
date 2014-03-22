@@ -9,6 +9,7 @@ namespace RxLauncher.Models
 	using System;
 	using System.Diagnostics;
 	using System.Text;
+	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Forms;
 	using Views;
@@ -29,6 +30,11 @@ namespace RxLauncher.Models
 
 		private void BuildProcess()
 		{
+			if (process == null)
+			{
+				process = new Process();
+			}
+
 			StringBuilder builder = new StringBuilder(server.ServerAddress);
 			builder.AppendFormat("?name={0}", null);
 
@@ -52,13 +58,16 @@ namespace RxLauncher.Models
 					}
 				}
 			}
+
+			process.StartInfo.Arguments = builder.ToString();
+			process.StartInfo.FileName = "";
 		}
 
 		public void Start()
 		{
 			BuildProcess();
 
-			process.Start();
+			Task.Factory.StartNew(() => process.Start());
 		}
 
 		public void Stop()
