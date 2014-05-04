@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:RxLauncher.ViewModels">
+	
+    <DataTemplate DataType="{x:Type vm:ServerViewModel}">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			
+			<Border Grid.Row="0">
+				<!--<Image Source="{Binding MapName}" />-->
+				<Image Source="/RxLauncher;component/Resources/Images/Maps/unknown.png" />
+			</Border>
+			
+			<Button Grid.Row="1"
+					Content="JOIN"
+					Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+					Command="{Binding JoinServerCommand}" />
+			
+		</Grid>
+	</DataTemplate>
+</ResourceDictionary>

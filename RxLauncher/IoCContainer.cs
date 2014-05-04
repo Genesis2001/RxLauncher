@@ -7,34 +7,40 @@
 namespace RxLauncher
 {
 	using System;
+	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 
 	public class IoCContainer
 	{
-		private readonly Dictionary<Type, object> contracts; 
+		private readonly IDictionary<Type, Object> contracts; 
 
 		public IoCContainer()
 		{
-			contracts = new Dictionary<Type, object>();
+			contracts = new ConcurrentDictionary<Type, Object>();
 		}
 
-		public T RegisterContract<T>(T contract) where T : class 
+		public T RegisterContract<T>(T contract, Boolean reset = false)
 		{
 			if (contracts.ContainsKey(typeof (T)))
 			{
-				throw new InvalidOperationException(
-					String.Format("Unable to register the specified contract. A '{0}' already registered.", typeof (T).Name));
+				if (!reset)
+				{
+					throw new InvalidOperationException(
+						String.Format("Unable to register the specified contract. A '{0}' already registered.", typeof (T).Name));
+				}
+
+				contracts.Remove(typeof(T));
 			}
 
 			contracts.Add(typeof (T), contract);
 			return contract;
 		}
 
-		public T RetrieveContract<T>() where T : class
+		public T RetrieveContract<T>()
 		{
-			object contract;
+			Object contract;
 
-			return contracts.TryGetValue(typeof (T), out contract) ? (T)contract : null;
+			return contracts.TryGetValue(typeof (T), out contract) ? (T)contract : default(T);
 		}
 	}
 }

@@ -85,6 +85,11 @@ namespace RxLauncher.ViewModels
 			get { return server.Settings.PlayerLimit; }
 		}
 
+		public String MapName
+		{
+			get { return server.Settings.MapName; }
+		}
+
 		public String Version
 		{
 			get { return server.Version; }

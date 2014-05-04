@@ -8,16 +8,26 @@ namespace RxLauncher.Models
 {
 	using System;
 	using System.Diagnostics;
+	using System.IO;
+	using System.Runtime.InteropServices;
 	using System.Text;
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Forms;
+	using System.Windows.Interop;
 	using Views;
 	using MessageBox = System.Windows.MessageBox;
+	using Application = System.Windows.Application;
 
 	public class Launcher : IDisposable
 	{
-		private Configuration config;
+		[DllImport("user32.dll")]
+		private static extern int SetWindowLong(HandleRef hWnd, int nIndex, int dwNewLong);
+
+		private static readonly string DefaultInstallationDirectory =
+			Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86), "Renegade X");
+
+		private readonly Configuration config;
 		private readonly Server server;
 		private Process process;
 
@@ -26,6 +36,16 @@ namespace RxLauncher.Models
 			config = iocc.RetrieveContract<Configuration>();
 
 			this.server = server;
+		}
+
+		private String BuildInstallationPath()
+		{
+			if (String.IsNullOrEmpty(config.InstallationPath))
+			{
+				// 
+			}
+
+			return config.InstallationPath;
 		}
 
 		private void BuildProcess()
@@ -40,8 +60,11 @@ namespace RxLauncher.Models
 
 			if (server.Settings.IsPassworded)
 			{
+				WindowInteropHelper helper = new WindowInteropHelper(Application.Current.MainWindow);
 				using (PasswordEntry dialog = new PasswordEntry())
 				{
+					SetWindowLong(new HandleRef(dialog, dialog.Handle), -8, helper.Handle.ToInt32());
+
 					var result = dialog.ShowDialog();
 
 					if (result == DialogResult.OK)
@@ -60,7 +83,7 @@ namespace RxLauncher.Models
 			}
 
 			process.StartInfo.Arguments = builder.ToString();
-			process.StartInfo.FileName = "";
+			process.StartInfo.FileName = BuildInstallationPath();
 		}
 
 		public void Start()
